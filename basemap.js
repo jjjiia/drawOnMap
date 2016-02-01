@@ -1,5 +1,5 @@
-var width = Math.max(960, window.innerWidth),
-    height = Math.max(500, window.innerHeight),
+var width = Math.max(660, window.innerWidth),
+    height = Math.max(400, window.innerHeight),
     prefix = prefixMatch(["webkit", "ms", "Moz", "O"]);
 
 var tile = d3.geo.tile()
@@ -102,44 +102,61 @@ function formatLocation(p, k) {
 
 
 var isDown = false;
-var xs = [0]
-var ys = [0]
-var frame = 0
-var speed = 0
-var rScale = d3.scale.linear().domain([0,100]).range([3,20])
+var ptdata = [];
+
+var drawingId = 0
+
+var line = d3.svg.line()
+    .interpolate("basis")
+    .x(function(d, i) { return d[0]; })
+    .y(function(d, i) { return d[1]; });
+
 var drawing =d3.select("#toplayer").append("svg").attr("width",width).attr("height",height).attr("x",0).attr("y",0)
 drawing.on('mousedown',function(){
         isDown = true
-        var originX = d3.mouse(this)[0]
-        var originY = d3.mouse(this)[1]
-        xs.push(d3.mouse(this)[0])
-        ys.push(d3.mouse(this)[1])
-        frame +=1
-        
-      //  console.log(d3.event.pageX)
-      //  console.log(d3.mouse(this))
-        //d3.select("#toplayer svg").append("circle").attr("r",5).attr("cx",x).attr("cy",y).attr("fill","red").attr("opacity",.7)
+        d3.selectAll(".poly").remove()
+        drawingId +=1
     })
     .on("mousemove",function(){
         info.text(formatLocation(projection.invert(d3.mouse(this)), zoom.scale()));
-       if (isDown == true){
-        var x = d3.mouse(this)[0]
-        var y = d3.mouse(this)[1]
-        xs.push(x)
-        ys.push(y)
-        frame +=1
-        var changeX = xs[frame]-xs[frame-1]
-        var changeY = ys[frame]-ys[frame-1]
-        var speed = Math.sqrt(changeX*changeX+changeY*changeY)
-        r = rScale(speed) 
-        draw(x,y,r)
+        if (isDown == true){
+            var pt = d3.mouse(this); tick(pt);
+            d3.select(".line").attr("opacity",1)
+            
         }
-        
     })
     .on("mouseup", function(){
+        //console.log(ptdata) // TODO: CONVERT TO LAT LNG AND EXPORT TO DATABASE
             isDown = false;
+            drawPolygon(ptdata,drawingId)
+            console.log(ptdata)
+            ptdata.push(ptdata[0])
+            path.attr("d", function(d) { return line(d);})
+            d3.select(".line").attr("opacity",0)
         }); 
-
-function draw(x,y,r){
+var path = drawing.append("g")
+  .append("path")
+    .data([ptdata])
+    .attr("class", "line")
+    .attr("d", line);
+    
+function tick(pt) {
+  ptdata.push(pt);
+  path.attr("d", function(d) { return line(d);})
+}
+function drawPolygon(points){
+    d3.select("#toplayer svg").
+    selectAll("polygon")
+    .data([points])
+    .enter()
+    .append("polygon")
+    .attr("points",function(d) { 
+        console.log(d)
+            return d.map(function(d) { return [d[0],d[1]].join(","); }).join(" ");})
+    .attr("fill","black")
+    .attr("opacity",.2)
+    .attr("class","poly");
+}
+function drawDots(x,y,r){
     d3.select("#toplayer svg").append("circle").attr("r",r).attr("cx",x).attr("cy",y).attr("fill","red").attr("opacity",.2)
 }
