@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="d3.geo.tile.min.js"></script>
+<style>
+
+body {
+  margin: 0;
+  background-color:#FFFFF4;
+}
+#basemap, #toplayer{
+  position:absolute;
+  left:0px;
+  top:0px;
+}
+.map {
+  position: relative;
+  overflow: hidden;
+}
+
+.layer {
+  position: absolute;
+}
+
+.tile {
+  position: absolute;
+  width: 256px;
+  height: 256px;
+}
+
+.tile path {
+  fill: none;
+  stroke: #000;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.tile .major_road { stroke: #000;stroke-width: .3px; }
+.tile .minor_road { stroke: #000;stroke-width: .3px; }
+.tile .highway { stroke: #000;stroke-width: .3px; }
+.tile .rail { stroke: #ddd; }
+.tile .water{ stroke:red;}
+
+.info {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-family: Helvetica;
+  font-size:18px;
+  color:rgba(255,0,0,.9);
+  letter-spacing:2px;
+}
+
+</style>
+<body>
+  <div id = "basemap"></div>
+  <div id = "toplayer"></div>
+  
+<script src="basemap.js"></script>
+<script src="draw.js"></script>
